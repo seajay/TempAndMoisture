@@ -9,29 +9,41 @@ const int HumidPowerB = 13;
 const int HumidIn = A5;
 int HumidInA;
 int HumidInB;
+const int referenceResistance= 22; // In kOhms, this is only a 16bit system.
+float measuredResistance;
 
 void setup() {
   // initialize serial communications at 9600 bps:
   Serial.begin(9600); 
   pinMode(HumidPowerA, OUTPUT);
   pinMode(HumidPowerB, OUTPUT);
+  pinMode(HumidIn, INPUT);
 }
 
 void loop() {
+
+  // Read the Resistance of the moisture sensor
   digitalWrite(HumidPowerA, HIGH);
   digitalWrite(HumidPowerB, LOW);
-  delay(100);
+  delay(10);
   HumidInA = analogRead(HumidIn);
+  
+  // Now switch polarity and read it again 
+  // (this is to avoid electrolisis on the sensor)
   digitalWrite(HumidPowerA, LOW);
   digitalWrite(HumidPowerB, HIGH);
-  delay(100);
+  delay(10);
   HumidInB = analogRead(HumidIn);
+  
+  // Switch off current through the sensor
   digitalWrite(HumidPowerB, LOW);
-
-  Serial.print("A = ");
-  Serial.print(HumidInA);
-  Serial.print(" B = ");
-  Serial.print(HumidInB);
+  
+  measuredResistance = referenceResistance * (1023 - HumidInA)/HumidInA;
+  Serial.print("R = ");
+  Serial.print(measuredResistance);
+  measuredResistance = referenceResistance * HumidInB / (1023 - HumidInB);
+  Serial.print(" R = ");
+  Serial.print(measuredResistance);
   
   LM35tempC = readLM35(LM35pin, true); // true = temp in celcius, false = temp in fahrenheit
   
@@ -39,10 +51,8 @@ void loop() {
   Serial.print(" Temp = " );                       
   Serial.println(LM35tempC);      
 
-  // wait 100 milliseconds before the next loop
-  // for the analog-to-digital converter to settle
-  // after the last reading:
-  delay(100);                     
+  //  Send status once every 30s
+  delay(30 * 1000);                     
 }
 
 float readLM35(byte LM35Pin, boolean celcius){       
