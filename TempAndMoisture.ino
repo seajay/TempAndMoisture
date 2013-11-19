@@ -4,9 +4,9 @@ const int LM35pin = A0; // connect LM35 Vout pin to arduino analog pin 0
 const int LM35ref = A1; // connect 2x 1N1418 diodes between LM35 ground pin and ground
 float LM35tempC;
 
-const int HumidPowerA = 12;
-const int HumidPowerB = 13;
-const int HumidIn = A5;
+const int HumidPowerA = 13;
+const int HumidPowerB = 12;
+const int HumidIn = A2;
 int HumidInA;
 int HumidInB;
 const int referenceResistance= 22; // In kOhms, this is only a 16bit system.
@@ -29,7 +29,7 @@ void loop() {
   HumidInA = analogRead(HumidIn);
   
   // Now switch polarity and read it again 
-  // (this is to avoid electrolisis on the sensor)
+  // (this is to avoid electrolysis on the sensor)
   digitalWrite(HumidPowerA, LOW);
   digitalWrite(HumidPowerB, HIGH);
   delay(10);
@@ -38,10 +38,10 @@ void loop() {
   // Switch off current through the sensor
   digitalWrite(HumidPowerB, LOW);
   
-  measuredResistance = referenceResistance * (1023 - HumidInA)/HumidInA;
+  measuredResistance = referenceResistance * (1023 - (float)HumidInA)/HumidInA;
   Serial.print("R = ");
   Serial.print(measuredResistance);
-  measuredResistance = referenceResistance * HumidInB / (1023 - HumidInB);
+  measuredResistance = referenceResistance * (float)HumidInB / (1023 - HumidInB);
   Serial.print(" R = ");
   Serial.print(measuredResistance);
   
